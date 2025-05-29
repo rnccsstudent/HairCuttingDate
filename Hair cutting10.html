@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Haircut Info</title>
+  <style>
+    :root {
+      --bg-light: #f0f4f8;
+      --bg-dark: #1e1e2f;
+      --text-light: #333;
+      --text-dark: #f5f5f5;
+      --card-light: #ffffff;
+      --card-dark: #2a2a40;
+      --highlight: #42a5f5;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.dark {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .filter-box, .controls {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    select, button {
+      padding: 10px 16px;
+      font-size: 16px;
+      margin: 8px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select {
+      background: white;
+      color: #333;
+      border: 1px solid #1976d2;
+    }
+
+    body.dark select {
+      background: #333;
+      color: white;
+      border-color: #90caf9;
+    }
+
+    button {
+      background: #1976d2;
+      color: white;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+    }
+
+    .mode-toggle {
+      float: right;
+      margin-top: -15px;
+      margin-right: 15px;
+      font-size: 22px;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 25px;
+      padding: 10px;
+    }
+
+    .card {
+      background: var(--card-light);
+      color: inherit;
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      padding: 25px;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: fadeInUp 0.6s forwards;
+    }
+
+    body.dark .card {
+      background: var(--card-dark);
+      color: var(--text-dark);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 22px;
+      color: inherit;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+
+    .info {
+      font-size: 17px;
+      margin: 10px 0;
+    }
+
+    .label {
+      font-weight: 600;
+    }
+
+    .highlight {
+      outline: 3px solid var(--highlight);
+      box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="mode-toggle" onclick="toggleMode()" title="Toggle Light/Dark Mode">🌙</button>
+
+  <div class="filter-box">
+    <select id="monthSelect">
+      <option value="">Select Month</option>
+      <option value="January">January</option>
+      <option value="February">February</option>
+      <option value="March">March</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+      <option value="November">November</option>
+      <option value="December">December</option>
+    </select>
+
+    <select id="yearSelect">
+      <option value="">Select Year</option>
+      <option value="2025">2025</option>
+      <option value="2024">2024</option>
+      <option value="2023">2023</option>
+    </select>
+  </div>
+
+  <div class="controls">
+    <button onclick="scrollPrev()">Previous</button>
+    <button onclick="scrollNext()">Next</button>
+    <button onclick="downloadPDF()">Export to PDF</button>
+  </div>
+
+  <div class="container" id="cardContainer"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const haircutData = [
+      { date: '2025-06-05', time: '4:00 PM', place: 'The Cut Spot, Salt Lake' },
+      { date: '2025-05-12', time: '10:00 AM', place: 'Hair Hub, New Town' },
+      { date: '2025-04-22', time: '12:30 PM', place: 'Elite Salon, South Kolkata' },
+      { date: '2025-04-10', time: '3:30 PM', place: 'Urban Style Salon, Kolkata' },
+      { date: '2024-12-01', time: '2:00 PM', place: 'Classic Cuts, Gariahat' },
+    ];
+
+    let currentIndex = 0;
+    let cardElements = [];
+
+    const cardContainer = document.getElementById('cardContainer');
+    const monthSelect = document.getElementById('monthSelect');
+    const yearSelect = document.getElementById('yearSelect');
+
+    function renderCards(data) {
+      cardContainer.innerHTML = '';
+      cardElements = [];
+
+      data.forEach((entry, index) => {
+        const dateObj = new Date(entry.date);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${index * 0.2}s`;
+        card.innerHTML = `
+          <h2>Hair Cutting Details</h2>
+          <div class="info"><span class="label">Date:</span> ${dateObj.toDateString()}</div>
+          <div class="info"><span class="label">Time:</span> ${entry.time}</div>
+          <div class="info"><span class="label">Place:</span> ${entry.place}</div>
+        `;
+        cardContainer.appendChild(card);
+        cardElements.push(card);
+      });
+
+      highlightCurrentCard();
+    }
+
+    function filterAndRender() {
+      let filtered = [...haircutData];
+      const month = monthSelect.value;
+      const year = yearSelect.value;
+
+      if (month) {
+        filtered = filtered.filter(entry => {
+          const date = new Date(entry.date);
+          return date.toLocaleString('default', { month: 'long' }) === month;
+        });
+      }
+
+      if (year) {
+        filtered = filtered.filter(entry => {
+          const date = new Date(entry.date);
+          return date.getFullYear().toString() === year;
+        });
+      }
+
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      currentIndex = 0;
+      renderCards(filtered);
+    }
+
+    function scrollToCard(index) {
+      if (cardElements.length === 0) return;
+
+      cardElements.forEach(card => card.classList.remove('highlight'));
+      cardElements[index].classList.add('highlight');
+      cardElements[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function scrollNext() {
+      if (currentIndex < cardElements.length - 1) {
+        currentIndex++;
+        scrollToCard(currentIndex);
+      }
+    }
+
+    function scrollPrev() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        scrollToCard(currentIndex);
+      }
+    }
+
+    function highlightCurrentCard() {
+      setTimeout(() => scrollToCard(currentIndex), 200);
+    }
+
+    function autoScrollCards() {
+      setInterval(() => {
+        if (currentIndex < cardElements.length - 1) {
+          currentIndex++;
+        } else {
+          currentIndex = 0;
+        }
+        scrollToCard(currentIndex);
+      }, 4000);
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+
+      cardElements.forEach((card, i) => {
+        const text = card.innerText.trim().split('\n');
+        text.forEach(line => {
+          doc.text(line, 10, y);
+          y += 8;
+        });
+        y += 10;
+        if (y > 270 && i < cardElements.length - 1) {
+          doc.addPage();
+          y = 10;
+        }
+      });
+
+      doc.save("haircut_info.pdf");
+    }
+
+    function toggleMode() {
+      document.body.classList.toggle('dark');
+      const btn = document.querySelector('.mode-toggle');
+      btn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
+
+    monthSelect.addEventListener('change', filterAndRender);
+    yearSelect.addEventListener('change', filterAndRender);
+
+    filterAndRender();
+    autoScrollCards();
+  </script>
+</body>
+</html>
