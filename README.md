@@ -60,10 +60,12 @@ const haircutData = [
 ];
 </pre>
 ---
-🧪 Preview
+### 🧪 Preview
 
 📄 License
-MIT License. Feel free to use, modify, and distribute.
+
+      MIT License. Feel free to use, modify, and distribute.
+
 ---
 ## 📁 Project Structure
 <pre> 
@@ -72,7 +74,7 @@ index.html
 
 
 ---
-## 👤 Author
+### 👤 Author
 
 **Pranab Mahata**  
 📧 pranabmahata197@gmail.com  
